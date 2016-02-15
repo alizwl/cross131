@@ -104,15 +104,25 @@ extern "C"
         }
     }
     
-    void JAVAsendLocalNotification(const char* title,const char* content,unsigned long time)
+    void JAVAsendLocalNotification(const char* title,const char* content,int time, const char* id)
     {
         JniMethodInfo jmi;
-        if(JniHelper::getStaticMethodInfo(jmi , "org/CrossApp/lib/AndroidNativeTool" , "sendLocalNotification" , "(Ljava/lang/String;Ljava/lang/String;J)V"))
-        {
-            jmi.env->CallStaticVoidMethod(jmi.classID , jmi.methodID,jmi.env->NewStringUTF(title),jmi.env->NewStringUTF(content),time);
+        if(JniHelper::getStaticMethodInfo(jmi , "org/CrossApp/lib/AndroidNativeTool" , "sendLocalNotification" , "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V"))
+        {//J;Ljava/lang/String;
+            jmi.env->CallStaticVoidMethod(jmi.classID , jmi.methodID,jmi.env->NewStringUTF(title), jmi.env->NewStringUTF(content), jmi.env->NewStringUTF(id), time);//,time,jmi.env->NewStringUTF(id)
             
         }
     }
+    
+    void JAVAcancelLocalNotification(const char* id)
+    {
+        JniMethodInfo jmi;
+        if(JniHelper::getStaticMethodInfo(jmi , "org/CrossApp/lib/AndroidNativeTool" , "cancelLocalNotification" , "(Ljava/lang/String;)V"))
+        {
+            jmi.env->CallStaticVoidMethod(jmi.classID , jmi.methodID,jmi.env->NewStringUTF(id));
+        }
+    }
+    
     void setJAVABrightness(int sender)
     {
         JniMethodInfo jmi;
@@ -250,9 +260,14 @@ void start()//ex
 	}
 }
 
-void sendLocalNotification(const char* title,const char* content,unsigned long time)
+void sendLocalNotification(const char* title,const char* content,long time, const char* id)
 {
-    JAVAsendLocalNotification(title,content,time);
+    JAVAsendLocalNotification(title,content,time, id);
+}
+    
+void cancelLocalNotification(const char* id)
+{
+    JAVAcancelLocalNotification(id);
 }
 
 void setVolume(float sender,int type)

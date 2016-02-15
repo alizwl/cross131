@@ -121,6 +121,7 @@ struct LocalNoticeMsg
     std::string title;
     std::string content;
     long startTime;
+    bool readed;
 };
 
 namespace CADevice

@@ -42,6 +42,14 @@ import android.util.Log;
 import android.widget.Toast;
 
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.AlarmManager;
+import android.content.Intent;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+
 @SuppressLint("SdCardPath")
 public class AndroidNativeTool
 {
@@ -52,6 +60,31 @@ public class AndroidNativeTool
 	public AndroidNativeTool( final Activity context )
 	{
 		s_pContext = context;
+	}
+	
+	public static void sendLocalNotification(final String title, final String content, final String id, int deltaTime)
+	{
+		AlarmManager am = (AlarmManager)s_pContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(s_pContext, AlarmReceiver.class);
+        //i.setAction(context.getApplicationContext().getPackageName()+".push."+baseIntent.getStringExtra("title"));
+        //i.putExtras(baseIntent);
+        i.putExtra("title", title);
+        i.putExtra("content", content);
+        i.putExtra("id", id);
+        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, 0);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5 * 1000, pi);
+        Log.d("push", "send");
+	}
+	
+	public static void cancelLocalNotification(final String id)
+	{
+		AlarmManager am = (AlarmManager)s_pContext.getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(s_pContext, AlarmReceiver.class);
+        
+        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, 0);
+        am.cancel(pi);
+        //am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + deltaTime * 1000, pi);
+        Log.d("push", "cancel");
 	}
 	
 	public static void ShowDlg( String[] args )
