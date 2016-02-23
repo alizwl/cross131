@@ -119,6 +119,7 @@ struct LocalNoticeMsg
     int type;
     std::string nid;
     std::string title;
+    std::string detail;
     std::string content;
     long startTime;
     bool readed;
