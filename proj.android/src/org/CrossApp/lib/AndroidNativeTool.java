@@ -49,6 +49,8 @@ import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
 @SuppressLint("SdCardPath")
 public class AndroidNativeTool
@@ -56,35 +58,71 @@ public class AndroidNativeTool
 	private static AlertDialog mDialog = null;
 	private static Activity s_pContext;
 	native static void NativeReturn( String arg1 , Object arg2 );
+	
+	public static final String POI_SERVICE_ACTION = "org.CrossApp.lib.PushService";
 
 	public AndroidNativeTool( final Activity context )
 	{
 		s_pContext = context;
+		
+		
+		Intent intent = new Intent(context, PushService.class); 
+		context.startService(intent);
+		
+	}
+	
+	public static void sendRemoteNotification(Context context, final String title, final String content, final String id, int timeSecond)
+	{
+		Log.d("push", "send");
+		AlarmManager am = (AlarmManager)context.getSystemService(Activity.ALARM_SERVICE);
+        Intent i = new Intent(context, AlarmReceiver.class);
+        //i.setAction("android.intent.action.BOOT_COMPLETED");
+        //i.putExtras(baseIntent);
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);   
+        bundle.putString("title",title);
+        bundle.putString("content", content);
+        i.putExtras(bundle);
+        
+        PendingIntent pi = PendingIntent.getBroadcast(context, Integer.valueOf(id), i, PendingIntent.FLAG_UPDATE_CURRENT);
+        long sTime = (long)timeSecond * 1000l;
+        am.set(AlarmManager.RTC_WAKEUP, sTime, pi);
+        Log.d("push", "send remote" + Integer.valueOf(id) + " : " + sTime);
+		
 	}
 	
 	public static void sendLocalNotification(final String title, final String content, final String id, int deltaTime)
 	{
-		AlarmManager am = (AlarmManager)s_pContext.getSystemService(Context.ALARM_SERVICE);
+		
+		AlarmManager am = (AlarmManager)s_pContext.getSystemService(Activity.ALARM_SERVICE);
         Intent i = new Intent(s_pContext, AlarmReceiver.class);
         //i.setAction(context.getApplicationContext().getPackageName()+".push."+baseIntent.getStringExtra("title"));
         //i.putExtras(baseIntent);
-        i.putExtra("title", title);
-        i.putExtra("content", content);
-        i.putExtra("id", id);
-        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, 0);
-        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5 * 1000, pi);
-        Log.d("push", "send");
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);   
+        bundle.putString("title",title);
+        bundle.putString("content", content);
+        i.putExtras(bundle);
+
+        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, PendingIntent.FLAG_UPDATE_CURRENT);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + (long)deltaTime * 1000l, pi);
+        Log.d("push", "send local : " + bundle.getString("id"));
+	        
 	}
 	
 	public static void cancelLocalNotification(final String id)
 	{
-		AlarmManager am = (AlarmManager)s_pContext.getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(s_pContext, AlarmReceiver.class);
-        
-        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, 0);
-        am.cancel(pi);
-        //am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + deltaTime * 1000, pi);
-        Log.d("push", "cancel");
+		if(s_pContext != null)
+		{
+			AlarmManager am = (AlarmManager)s_pContext.getSystemService(Context.ALARM_SERVICE);
+	        Intent i = new Intent(s_pContext, AlarmReceiver.class);
+	        
+	        PendingIntent pi = PendingIntent.getBroadcast(s_pContext, Integer.valueOf(id), i, 0);
+	        am.cancel(pi);
+	        //am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + deltaTime * 1000, pi);
+	        Log.d("push", "cancel");
+		}
+		
 	}
 	
 	public static void ShowDlg( String[] args )
