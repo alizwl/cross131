@@ -122,7 +122,7 @@ void sendLocalNotification(const char* title, const char* content, long time, co
     
     UILocalNotification *notification = [[[UILocalNotification alloc] init] autorelease];
 //    设置10秒之后
-    NSDate *pushDate = [NSDate dateWithTimeIntervalSinceNow:5];
+    NSDate *pushDate = [NSDate dateWithTimeIntervalSinceNow:time];
     if (notification != nil) {
         // 设置推送时间
         notification.fireDate = pushDate;
